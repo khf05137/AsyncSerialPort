@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace khf05137.IO.Ports
 {
-    public class AsyncSerialPort : IAsyncSerialPort
+    public class AsyncSerialPort : Component,
+        IAsyncSerialPort
     {
         SerialPort port;
 
