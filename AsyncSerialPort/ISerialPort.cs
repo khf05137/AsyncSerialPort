@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 
 namespace khf05137.IO.Ports
 {
-    public interface ISerialPort
+    public interface ISerialPort : IDisposable
     {
         Stream BaseStream { get; }
         int BaudRate { get; set; }

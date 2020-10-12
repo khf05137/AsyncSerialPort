@@ -46,6 +46,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="IAsyncSerialPort.cs" />
+    <Compile Include="SerialPortEx.cs" />
     <Compile Include="ISerialPort.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -9,16 +9,16 @@ namespace khf05137.IO.Ports
     public class AsyncSerialPort : Component,
         IAsyncSerialPort
     {
-        SerialPort port;
+        ISerialPort port;
 
-        public AsyncSerialPort() => this.port = new SerialPort();
-        public AsyncSerialPort(SerialPort port) => this.port = port;
-        public AsyncSerialPort(IContainer container) => this.port = new SerialPort(container);
-        public AsyncSerialPort(string portName) => this.port = new SerialPort(portName);
-        public AsyncSerialPort(string portName, int baudRate) => this.port = new SerialPort(portName, baudRate);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity) => this.port = new SerialPort(portName, baudRate, parity);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits, StopBits);
+        public AsyncSerialPort() => this.port = new InternalSerialPort();
+        public AsyncSerialPort(ISerialPort port) => this.port = port;
+        public AsyncSerialPort(IContainer container) => this.port = new InternalSerialPort(container);
+        public AsyncSerialPort(string portName) => this.port = new InternalSerialPort(portName);
+        public AsyncSerialPort(string portName, int baudRate) => this.port = new InternalSerialPort(portName, baudRate);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity) => this.port = new InternalSerialPort(portName, baudRate, parity);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits) => this.port = new InternalSerialPort(portName, baudRate, parity, dataBits);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new InternalSerialPort(portName, baudRate, parity, dataBits, StopBits);
 
         public Stream BaseStream => this.port.BaseStream;
 
