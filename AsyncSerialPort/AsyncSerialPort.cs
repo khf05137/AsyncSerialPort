@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace khf05137.IO.Ports
 {
-    public class AsyncSerialPort : Component,
+    public class AsyncSerialPort :
         IAsyncSerialPort
     {
         ISerialPort port;
 
-        public AsyncSerialPort() => this.port = new InternalSerialPort();
+        public AsyncSerialPort() => this.port = new SerialPortEx();
         public AsyncSerialPort(ISerialPort port) => this.port = port;
-        public AsyncSerialPort(IContainer container) => this.port = new InternalSerialPort(container);
-        public AsyncSerialPort(string portName) => this.port = new InternalSerialPort(portName);
-        public AsyncSerialPort(string portName, int baudRate) => this.port = new InternalSerialPort(portName, baudRate);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity) => this.port = new InternalSerialPort(portName, baudRate, parity);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits) => this.port = new InternalSerialPort(portName, baudRate, parity, dataBits);
-        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new InternalSerialPort(portName, baudRate, parity, dataBits, StopBits);
+        public AsyncSerialPort(IContainer container) => this.port = new SerialPortEx(container);
+        public AsyncSerialPort(string portName) => this.port = new SerialPortEx(portName);
+        public AsyncSerialPort(string portName, int baudRate) => this.port = new SerialPortEx(portName, baudRate);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity) => this.port = new SerialPortEx(portName, baudRate, parity);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits) => this.port = new SerialPortEx(portName, baudRate, parity, dataBits);
+        public AsyncSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new SerialPortEx(portName, baudRate, parity, dataBits, StopBits);
 
         public Stream BaseStream => this.port.BaseStream;
 
@@ -97,5 +97,11 @@ namespace khf05137.IO.Ports
         public void WriteAsync(char[] buffer, int offset, int count) => Task.Run(() => Write(buffer, offset, count));
 
         public void WriteLineAsync(string text) => Task.Run(() => WriteLine(text));
+
+        public void Dispose()
+        {
+            this.port?.Dispose();
+            this.port = null;
+        }
     }
 }

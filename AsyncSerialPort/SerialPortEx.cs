@@ -9,23 +9,19 @@ using System.Threading.Tasks;
 
 namespace khf05137.IO.Ports
 {
-    public static class SerialPortEx
-    {
-        public static ISerialPort AsInterface(this SerialPort port) => new InternalSerialPort(port);
-    }
-
-    internal class InternalSerialPort : ISerialPort
+    public class SerialPortEx :
+        ISerialPort
     {
         SerialPort port;
 
-        public InternalSerialPort() => this.port = new SerialPort();
-        public InternalSerialPort(SerialPort port) => this.port = port;
-        public InternalSerialPort(IContainer container) => this.port = new SerialPort(container);
-        public InternalSerialPort(string portName) => this.port = new SerialPort(portName);
-        public InternalSerialPort(string portName, int baudRate) => this.port = new SerialPort(portName, baudRate);
-        public InternalSerialPort(string portName, int baudRate, Parity parity) => this.port = new SerialPort(portName, baudRate, parity);
-        public InternalSerialPort(string portName, int baudRate, Parity parity, int dataBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits);
-        public InternalSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits, StopBits);
+        public SerialPortEx() => this.port = new SerialPort();
+        public SerialPortEx(SerialPort port) => this.port = port;
+        public SerialPortEx(IContainer container) => this.port = new SerialPort(container);
+        public SerialPortEx(string portName) => this.port = new SerialPort(portName);
+        public SerialPortEx(string portName, int baudRate) => this.port = new SerialPort(portName, baudRate);
+        public SerialPortEx(string portName, int baudRate, Parity parity) => this.port = new SerialPort(portName, baudRate, parity);
+        public SerialPortEx(string portName, int baudRate, Parity parity, int dataBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits);
+        public SerialPortEx(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) => this.port = new SerialPort(portName, baudRate, parity, dataBits, StopBits);
 
         public Stream BaseStream => this.port.BaseStream;
 
