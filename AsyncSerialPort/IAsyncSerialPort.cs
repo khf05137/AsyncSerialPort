@@ -11,8 +11,8 @@ namespace khf05137.IO.Ports
         Task<string> ReadLineAsync();
         Task<string> ReadToAsync(string value);
         Task WriteAsync(byte[] buffer, int offset, int count);
-        void WriteAsync(char[] buffer, int offset, int count);
+        Task WriteAsync(char[] buffer, int offset, int count);
         Task WriteAsync(string text);
-        void WriteLineAsync(string text);
+        Task WriteLineAsync(string text);
     }
 }

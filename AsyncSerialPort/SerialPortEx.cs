@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace khf05137.IO.Ports
 {
@@ -59,9 +55,9 @@ namespace khf05137.IO.Ports
         public int WriteBufferSize { get => this.port.WriteBufferSize; set => this.port.WriteBufferSize = value; }
         public int WriteTimeout { get => this.port.WriteTimeout; set => this.port.WriteTimeout = value; }
 
-        public event SerialDataReceivedEventHandler DataReceived;
-        public event SerialErrorReceivedEventHandler ErrorReceived;
-        public event SerialPinChangedEventHandler PinChanged;
+        public event SerialDataReceivedEventHandler DataReceived { add => this.port.DataReceived += value; remove => this.port.DataReceived -= value; }
+        public event SerialErrorReceivedEventHandler ErrorReceived { add => this.port.ErrorReceived += value; remove => this.port.ErrorReceived -= value; }
+        public event SerialPinChangedEventHandler PinChanged { add => this.port.PinChanged += value; remove => this.port.PinChanged -= value; }
 
         public void Close() => this.port.Close();
 

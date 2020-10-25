@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.IO.Ports;
+using System.Reactive.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using khf05137.IO.Ports;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Win32.SafeHandles;
@@ -163,13 +166,183 @@ namespace khf05137.IO.Ports.UnitTest
                 port.DiscardOutBuffer();
                 mock.Verify(x => x.DiscardOutBuffer(), Times.Once);
 
-                var readBuff = new byte[1] { 0xff };
+                var readBuff = new byte[1];
                 mock.Setup(x => x.Read(readBuff, 0, 1)).Returns(1);
                 Assert.AreEqual(1, port.Read(readBuff, 0, 1));
                 mock.Verify(x => x.Read(readBuff, 0, 1), Times.Once);
 
+                var readfCharBuff = new char[1];
+                mock.Setup(x => x.Read(readfCharBuff, 0, 1)).Returns(1);
+                Assert.AreEqual(1, port.Read(readfCharBuff, 0, 1));
+                mock.Verify(x => x.Read(readfCharBuff, 0, 1), Times.Once);
 
+                mock.Setup(x => x.ReadByte()).Returns(0xff);
+                Assert.AreEqual(0xff, port.ReadByte());
+                mock.Verify(x => x.ReadByte(), Times.Once);
+
+                mock.Setup(x => x.ReadChar()).Returns('A');
+                Assert.AreEqual('A', port.ReadChar());
+                mock.Verify(x => x.ReadChar(), Times.Once);
+
+                mock.Setup(x => x.ReadExisting()).Returns("ABC");
+                Assert.AreEqual("ABC", port.ReadExisting());
+                mock.Verify(x => x.ReadExisting(), Times.Once);
+
+                mock.Setup(x => x.ReadLine()).Returns("XYZ");
+                Assert.AreEqual("XYZ", port.ReadLine());
+                mock.Verify(x => x.ReadLine(), Times.Once);
+
+                mock.Setup(x => x.ReadTo("\t")).Returns("LMN");
+                Assert.AreEqual("LMN", port.ReadTo("\t"));
+                mock.Verify(x => x.ReadTo("\t"), Times.Once);
+
+                byte[] writeBuff = new byte[] { 0, 1, 2 };
+                port.Write(writeBuff, 0, 1);
+                mock.Verify(x => x.Write(writeBuff, 0, 1), Times.Once);
+
+                char[] writeCharBuff = new char[] { 'A', 'B', 'C' };
+                port.Write(writeCharBuff, 0, 1);
+                mock.Verify(x => x.Write(writeCharBuff, 0, 1), Times.Once);
+
+                var writeStr = "ABC";
+                port.Write(writeStr);
+                mock.Verify(x => x.Write(writeStr), Times.Once);
+
+                var writeStr2 = "XYZ";
+                port.WriteLine(writeStr2);
+                mock.Verify(x => x.WriteLine(writeStr2), Times.Once);
             }
+        }
+
+        [TestMethod]
+        public async Task TestMethodAsync()
+        {
+            var mock = new Mock<ISerialPort>();
+            using (var port = new AsyncSerialPort(mock.Object))
+            {
+                var readBuff = new byte[1];
+                mock.Setup(x => x.Read(readBuff, 0, 1)).Returns(1);
+                Assert.AreEqual(1, await port.ReadAsync(readBuff, 0, 1));
+                mock.Verify(x => x.Read(readBuff, 0, 1), Times.Once);
+
+                var readfCharBuff = new char[1];
+                mock.Setup(x => x.Read(readfCharBuff, 0, 1)).Returns(1);
+                Assert.AreEqual(1, await port.ReadAsync(readfCharBuff, 0, 1));
+                mock.Verify(x => x.Read(readfCharBuff, 0, 1), Times.Once);
+
+                mock.Setup(x => x.ReadByte()).Returns(0xff);
+                Assert.AreEqual(0xff, await port.ReadByteAsync());
+                mock.Verify(x => x.ReadByte(), Times.Once);
+
+                mock.Setup(x => x.ReadChar()).Returns('A');
+                Assert.AreEqual('A', await port.ReadCharAsync());
+                mock.Verify(x => x.ReadChar(), Times.Once);
+
+                mock.Setup(x => x.ReadLine()).Returns("XYZ");
+                Assert.AreEqual("XYZ", await port.ReadLineAsync());
+                mock.Verify(x => x.ReadLine(), Times.Once);
+
+                mock.Setup(x => x.ReadTo("\t")).Returns("LMN");
+                Assert.AreEqual("LMN", await port.ReadToAsync("\t"));
+                mock.Verify(x => x.ReadTo("\t"), Times.Once);
+
+                byte[] writeBuff = new byte[] { 0, 1, 2 };
+                await port.WriteAsync(writeBuff, 0, 1);
+                mock.Verify(x => x.Write(writeBuff, 0, 1), Times.Once);
+
+                char[] writeCharBuff = new char[] { 'A', 'B', 'C' };
+                await port.WriteAsync(writeCharBuff, 0, 1);
+                mock.Verify(x => x.Write(writeCharBuff, 0, 1), Times.Once);
+
+                var writeStr = "ABC";
+                await port.WriteAsync(writeStr);
+                mock.Verify(x => x.Write(writeStr), Times.Once);
+
+                var writeStr2 = "XYZ";
+                await port.WriteLineAsync(writeStr2);
+                mock.Verify(x => x.WriteLine(writeStr2), Times.Once);
+            }
+        }
+
+        [TestMethod]
+        public void TestDataReceivedEvent()
+        {
+            var mock = new Mock<ISerialPort>();
+            mock.SetupAdd(x => x.DataReceived += It.IsAny<SerialDataReceivedEventHandler>());
+            mock.SetupRemove(x => x.DataReceived -= It.IsAny<SerialDataReceivedEventHandler>());
+
+            using (var port = new AsyncSerialPort(mock.Object))
+            {
+                bool received = false;
+                using (Observable.FromEventPattern<SerialDataReceivedEventHandler, SerialDataReceivedEventArgs>(
+                    x => port.DataReceived += x, x => port.DataReceived -= x)
+                    .Select(x => x.EventArgs)
+                    .Subscribe(x =>
+                    {
+                        received = true;
+                    }))
+                {
+                    mock.Raise(x => x.DataReceived += null, SerialDataReceivedEventArgs.Empty as SerialDataReceivedEventArgs);
+                    Assert.IsTrue(received);
+                }
+            }
+
+            mock.VerifyAdd(x => x.DataReceived += It.IsAny<SerialDataReceivedEventHandler>(), Times.Once);
+            mock.VerifyRemove(x => x.DataReceived -= It.IsAny<SerialDataReceivedEventHandler>(), Times.Once);
+        }
+
+        [TestMethod]
+        public void TestErrorReceivedEvent()
+        {
+            var mock = new Mock<ISerialPort>();
+            mock.SetupAdd(x => x.ErrorReceived += It.IsAny<SerialErrorReceivedEventHandler>());
+            mock.SetupRemove(x => x.ErrorReceived -= It.IsAny<SerialErrorReceivedEventHandler>());
+
+            using (var port = new AsyncSerialPort(mock.Object))
+            {
+                bool received = false;
+                using (Observable.FromEventPattern<SerialErrorReceivedEventHandler, SerialErrorReceivedEventArgs>(
+                    x => port.ErrorReceived += x, x => port.ErrorReceived -= x)
+                    .Select(x => x.EventArgs)
+                    .Subscribe(x =>
+                    {
+                        received = true;
+                    }))
+                {
+                    mock.Raise(x => x.ErrorReceived += null, SerialDataReceivedEventArgs.Empty as SerialDataReceivedEventArgs);
+                    Assert.IsTrue(received);
+                }
+            }
+
+            mock.VerifyAdd(x => x.ErrorReceived += It.IsAny<SerialErrorReceivedEventHandler>(), Times.Once);
+            mock.VerifyRemove(x => x.ErrorReceived -= It.IsAny<SerialErrorReceivedEventHandler>(), Times.Once);
+        }
+
+        [TestMethod]
+        public void TestPinChangedEvent()
+        {
+            var mock = new Mock<ISerialPort>();
+            mock.SetupAdd(x => x.PinChanged += It.IsAny<SerialPinChangedEventHandler>());
+            mock.SetupRemove(x => x.PinChanged -= It.IsAny<SerialPinChangedEventHandler>());
+
+            using (var port = new AsyncSerialPort(mock.Object))
+            {
+                bool received = false;
+                using (Observable.FromEventPattern<SerialPinChangedEventHandler, SerialPinChangedEventArgs>(
+                    x => port.PinChanged += x, x => port.PinChanged -= x)
+                    .Select(x => x.EventArgs)
+                    .Subscribe(x =>
+                    {
+                        received = true;
+                    }))
+                {
+                    mock.Raise(x => x.PinChanged += null, SerialDataReceivedEventArgs.Empty as SerialDataReceivedEventArgs);
+                    Assert.IsTrue(received);
+                }
+            }
+
+            mock.VerifyAdd(x => x.PinChanged += It.IsAny<SerialPinChangedEventHandler>(), Times.Once);
+            mock.VerifyRemove(x => x.PinChanged -= It.IsAny<SerialPinChangedEventHandler>(), Times.Once);
         }
     }
 }

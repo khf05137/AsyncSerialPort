@@ -56,9 +56,9 @@ namespace khf05137.IO.Ports
         public int WriteBufferSize { get => this.port.WriteBufferSize; set => this.port.WriteBufferSize = value; }
         public int WriteTimeout { get => this.port.WriteTimeout; set => this.port.WriteTimeout = value; }
 
-        public event SerialDataReceivedEventHandler DataReceived;
-        public event SerialErrorReceivedEventHandler ErrorReceived;
-        public event SerialPinChangedEventHandler PinChanged;
+        public event SerialDataReceivedEventHandler DataReceived { add => this.port.DataReceived += value; remove => this.port.DataReceived -= value; }
+        public event SerialErrorReceivedEventHandler ErrorReceived { add => this.port.ErrorReceived += value; remove => this.port.ErrorReceived -= value; }
+        public event SerialPinChangedEventHandler PinChanged { add => this.port.PinChanged += value; remove => this.port.PinChanged -= value; }
 
         public void Close() => this.port.Close();
 
@@ -94,9 +94,9 @@ namespace khf05137.IO.Ports
 
         public Task WriteAsync(byte[] buffer, int offset, int count) => Task.Run(() => Write(buffer, offset, count));
         public Task WriteAsync(string text) => Task.Run(() => Write(text));
-        public void WriteAsync(char[] buffer, int offset, int count) => Task.Run(() => Write(buffer, offset, count));
+        public Task WriteAsync(char[] buffer, int offset, int count) => Task.Run(() => Write(buffer, offset, count));
 
-        public void WriteLineAsync(string text) => Task.Run(() => WriteLine(text));
+        public Task WriteLineAsync(string text) => Task.Run(() => WriteLine(text));
 
         public void Dispose()
         {
